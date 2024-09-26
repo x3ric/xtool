@@ -1,0 +1,47 @@
+#!/bin/bash
+
+CC=gcc
+CFLAGS="-Wall -Wextra -O2 -std=c99"
+CPPFLAGS="-D_DEFAULT_SOURCE"
+LDFLAGS=""
+LIBS="-lX11 -lXtst -lXi -lXinerama -lm"
+TARGET="xtool"
+SRCS="main.c"
+
+build() {
+    echo "Building $TARGET..."
+    $CC $CPPFLAGS $CFLAGS $LDFLAGS -o $TARGET $SRCS $LIBS
+    if [[ $? -eq 0 ]]; then
+        echo "$TARGET built successfully."
+    else
+        echo "Build failed."
+        exit 1
+    fi
+}
+
+run() {
+    clean
+    if [[ ! -f $TARGET ]]; then
+        echo "$TARGET not found, building..."
+        build
+    fi
+    echo "Running $TARGET with arguments: $@"
+    ./$TARGET "$@"
+}
+
+clean() {
+    echo "Cleaning up..."
+    rm -f $TARGET
+}
+
+if [[ "$1" == "build" ]]; then
+    build
+elif [[ "$1" == "run" ]]; then
+    shift
+    run "$@"
+elif [[ "$1" == "clean" ]]; then
+    clean
+else
+    echo "Usage: $0 {build|run|clean} [args...]"
+    exit 1
+fi
